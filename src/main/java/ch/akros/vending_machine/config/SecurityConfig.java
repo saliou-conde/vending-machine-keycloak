@@ -1,6 +1,7 @@
 package ch.akros.vending_machine.config;
 
 import ch.akros.vending_machine.service.JwtAuthConverter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -15,6 +16,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
   private final JwtAuthConverter jwtAuthConverter;
@@ -32,7 +34,7 @@ public class SecurityConfig {
    */
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-     http
+    return http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(req -> req
                     .requestMatchers(PUBLIC_URLS).permitAll()
@@ -44,7 +46,6 @@ public class SecurityConfig {
             )
             .sessionManagement(session -> session
                     .sessionCreationPolicy(STATELESS)
-            );
-    return http.build();
+            ).build();
   }
 }

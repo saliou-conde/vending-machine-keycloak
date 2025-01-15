@@ -10,6 +10,7 @@ import ch.akros.vending_machine.plausibility.ProductValidator;
 import ch.akros.vending_machine.repository.ProductRepository;
 import ch.akros.vending_machine.service.ProductService;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,7 @@ import static ch.akros.vending_machine.constant.AppConstant.PRODUCT_KEY;
 import static org.springframework.http.HttpStatus.*;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
     private static final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
