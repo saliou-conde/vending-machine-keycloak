@@ -18,7 +18,6 @@ import java.util.Optional;
 import static ch.akros.vending_machine.constant.AppConstant.PRODUCT_KEY;
 import static ch.akros.vending_machine.dto.mapper.ProductMapper.PRODUCT_MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.openMocks;
 import static org.springframework.http.HttpStatus.*;
@@ -97,7 +96,7 @@ class ProductServiceTest {
   }
 
   @Test
-  void createProductWithAlreadyExistingProduct() {
+  void getProductByNonExistingProduct() {
     //Given
     ProductDTO productDTO = ProductDTO.builder()
             .productId(1)
@@ -108,17 +107,17 @@ class ProductServiceTest {
 
     Product product = MAPPER.mapToProduct(productDTO);
 
-    when(productRepository.save(product)).thenReturn(product);
-    when(productRepository.findByProductName(productDTO.getProductName())).thenReturn(product);
+    when(productRepository.findById(productDTO.getProductId())).thenReturn(Optional.of(product));
 
     //When
-    var responseDto = productService.createProduct(productDTO);
+    ProductResponseDto responseDto = productService.getProduct(Integer.MAX_VALUE);
 
+    //Then
     assertThat(responseDto).isNotNull();
-    assertThat(responseDto.getStatus()).isNotNull().isEqualTo(CREATED);
+    assertThat(responseDto.getStatus()).isNotNull().isEqualTo(NOT_FOUND);
 
     //Verify
-    verify(productRepository, times(1)).save(product);
+    verify(productRepository, times(0)).findById(productDTO.getProductId());
   }
 
   @Test
@@ -139,11 +138,64 @@ class ProductServiceTest {
     //When
     var responseDto = productService.createProduct(productDTO);
 
+    //Then
     assertThat(responseDto).isNotNull();
     assertThat(responseDto.getStatus()).isNotNull().isEqualTo(CREATED);
 
     //Verify
     verify(productRepository, times(1)).save(any());
+  }
+
+  @Test
+  void createProductWithQuantityMoreThan10Products() {
+    //Given
+    ProductDTO productDTO = ProductDTO.builder()
+            .productId(1)
+            .productName("Cola")
+            .productPrice(350)
+            .quantity(11)
+            .build();
+
+    Product product = MAPPER.mapToProduct(productDTO);
+
+    when(productRepository.findByProductName(productDTO.getProductName())).thenReturn(product);
+    when(productRepository.save(any())).thenReturn(product);
+
+    //When
+    var responseDto = productService.createProduct(productDTO);
+
+    //Then
+    assertThat(responseDto).isNotNull();
+    assertThat(responseDto.getStatus()).isNotNull().isEqualTo(BAD_REQUEST);
+
+    //Verify
+    verify(productRepository, times(0)).save(any());
+  }
+
+  @Test
+  void createProductWithAlreadyExistingProduct() {
+    //Given
+    ProductDTO productDTO = ProductDTO.builder()
+            .productId(1)
+            .productName("Cola")
+            .productPrice(350)
+            .quantity(1)
+            .build();
+
+    Product product = MAPPER.mapToProduct(productDTO);
+
+    when(productRepository.save(product)).thenReturn(product);
+    when(productRepository.findByProductName(productDTO.getProductName())).thenReturn(product);
+
+    //When
+    var responseDto = productService.createProduct(productDTO);
+
+    //Then
+    assertThat(responseDto).isNotNull();
+    assertThat(responseDto.getStatus()).isNotNull().isEqualTo(CREATED);
+
+    //Verify
+    verify(productRepository, times(1)).save(product);
   }
 
   @Test
@@ -308,7 +360,7 @@ class ProductServiceTest {
             .build();
 
     PriceRequestDTO priceRequestDTO = PriceRequestDTO.builder()
-            .prices(List.of(50,100,200))
+            .prices(List.of(50, 100, 200))
             .build();
 
     Product product = MAPPER.mapToProduct(productDTO);
@@ -321,5 +373,109 @@ class ProductServiceTest {
     //Then
     assertThat(responseDto).isNotNull();
     assertThat(responseDto.getStatus()).isNotNull().isEqualTo(OK);
+  }
+
+  @Test
+  void buyProductByUsingNonExistingProductName() {
+    //Given
+    ProductDTO productDTO = ProductDTO.builder()
+            .productId(1)
+            .productName("Cola")
+            .productPrice(350)
+            .quantity(1)
+            .build();
+
+    PriceRequestDTO priceRequestDTO = PriceRequestDTO.builder()
+            .prices(List.of(50, 100, 200))
+            .build();
+
+    Product product = MAPPER.mapToProduct(productDTO);
+
+    when(productRepository.findById(productDTO.getProductId())).thenReturn(Optional.of(product));
+
+    //When
+    var responseDto = productService.buyProduct(Integer.MAX_VALUE, priceRequestDTO);
+
+    //Then
+    assertThat(responseDto).isNotNull();
+    assertThat(responseDto.getStatus()).isNotNull().isEqualTo(NOT_FOUND);
+  }
+
+  @Test
+  void buyProductWithNotAllowedCoins() {
+    //Given
+    ProductDTO productDTO = ProductDTO.builder()
+            .productId(1)
+            .productName("Cola")
+            .productPrice(510)
+            .quantity(1)
+            .build();
+
+    PriceRequestDTO priceRequestDTO = PriceRequestDTO.builder()
+            .prices(List.of(1, 5, 500))
+            .build();
+
+    Product product = MAPPER.mapToProduct(productDTO);
+
+    when(productRepository.findById(productDTO.getProductId())).thenReturn(Optional.of(product));
+
+    //When
+    var responseDto = productService.buyProduct(productDTO.getProductId(), priceRequestDTO);
+
+    //Then
+    assertThat(responseDto).isNotNull();
+    assertThat(responseDto.getStatus()).isNotNull().isEqualTo(BAD_REQUEST);
+  }
+
+  @Test
+  void buyProductWithLessThanPrice() {
+    //Given
+    ProductDTO productDTO = ProductDTO.builder()
+            .productId(1)
+            .productName("Cola")
+            .productPrice(350)
+            .quantity(1)
+            .build();
+
+    PriceRequestDTO priceRequestDTO = PriceRequestDTO.builder()
+            .prices(List.of(50, 100, 100))
+            .build();
+
+    Product product = MAPPER.mapToProduct(productDTO);
+
+    when(productRepository.findById(productDTO.getProductId())).thenReturn(Optional.of(product));
+
+    //When
+    var responseDto = productService.buyProduct(productDTO.getProductId(), priceRequestDTO);
+
+    //Then
+    assertThat(responseDto).isNotNull();
+    assertThat(responseDto.getStatus()).isNotNull().isEqualTo(BAD_REQUEST);
+  }
+
+  @Test
+  void buyProductWithMoreThanPrice() {
+    //Given
+    ProductDTO productDTO = ProductDTO.builder()
+            .productId(1)
+            .productName("Cola")
+            .productPrice(350)
+            .quantity(1)
+            .build();
+
+    PriceRequestDTO priceRequestDTO = PriceRequestDTO.builder()
+            .prices(List.of(50, 100, 1000))
+            .build();
+
+    Product product = MAPPER.mapToProduct(productDTO);
+
+    when(productRepository.findById(productDTO.getProductId())).thenReturn(Optional.of(product));
+
+    //When
+    var responseDto = productService.buyProduct(productDTO.getProductId(), priceRequestDTO);
+
+    //Then
+    assertThat(responseDto).isNotNull();
+    assertThat(responseDto.getStatus()).isNotNull().isEqualTo(BAD_REQUEST);
   }
 }

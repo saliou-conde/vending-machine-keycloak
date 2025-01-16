@@ -20,10 +20,6 @@ public class ProductController {
 
   private final ProductService productService;
 
-  public ProductController(ProductService productService) {
-    this.productService = productService;
-  }
-
   @Operation(
           description = "Get all Products",
           summary = "Display all the products.",

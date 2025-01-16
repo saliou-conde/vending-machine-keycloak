@@ -21,10 +21,6 @@ public class SecurityConfig {
 
   private final JwtAuthConverter jwtAuthConverter;
 
-  public SecurityConfig(JwtAuthConverter jwtAuthConverter) {
-    this.jwtAuthConverter = jwtAuthConverter;
-  }
-
   /**
    * Provides a SecurityFilterChain bean that configures HTTP security for the application.
    *

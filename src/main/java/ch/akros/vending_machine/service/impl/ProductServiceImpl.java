@@ -9,7 +9,6 @@ import ch.akros.vending_machine.plausibility.ProductValidation;
 import ch.akros.vending_machine.plausibility.ProductValidator;
 import ch.akros.vending_machine.repository.ProductRepository;
 import ch.akros.vending_machine.service.ProductService;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
