@@ -48,13 +48,15 @@ class ProductControllerTest {
             .quantity(1)
             .build();
 
-    when(productService.getProducts()).thenReturn(List.of(productDTO1, productDTO2));
+    var productDTOS = List.of(productDTO1, productDTO2);
+    when(productService.getProducts()).thenReturn(productDTOS);
 
     //When
     var responseEntity = controller.getAllProducts();
     assertThat(responseEntity).isNotNull();
     assertThat(responseEntity.getStatusCode()).isEqualTo(OK);
-    assertThat(responseEntity.getBody()).isEqualTo(2);
+    int size = responseEntity.getBody().size();
+    assertThat(size).isEqualTo(productDTOS.size());
 
     //Verify
     verify(productService, times(1)).getProducts();
@@ -85,7 +87,8 @@ class ProductControllerTest {
     //Then
     assertThat(responseEntity).isNotNull();
     assertThat(responseEntity.getStatusCode()).isEqualTo(OK);
-    assertThat(responseEntity.getBody().getData().get(PRODUCT_KEY)).isEqualTo(productDTO1);
+    ProductDTO actual = responseEntity.getBody().getData().get(PRODUCT_KEY);
+    assertThat(actual).isEqualTo(productDTO1);
   }
 
   @Test
@@ -113,7 +116,8 @@ class ProductControllerTest {
     //Then
     assertThat(responseEntity).isNotNull();
     assertThat(responseEntity.getStatusCode()).isEqualTo(OK);
-    assertThat(responseEntity.getBody().getData().get(PRODUCT_KEY)).isEqualTo(productDTO1);
+    ProductDTO actual = responseEntity.getBody().getData().get(PRODUCT_KEY);
+    assertThat(actual).isEqualTo(productDTO1);
   }
 
   @Test
@@ -141,7 +145,8 @@ class ProductControllerTest {
     //Then
     assertThat(responseEntity).isNotNull();
     assertThat(responseEntity.getStatusCode()).isEqualTo(OK);
-    assertThat(responseEntity.getBody().getData().get(PRODUCT_KEY)).isEqualTo(productDTO1);
+    ProductDTO actual = responseEntity.getBody().getData().get(PRODUCT_KEY);
+    assertThat(actual).isEqualTo(productDTO1);
   }
 
   @Test
@@ -170,7 +175,8 @@ class ProductControllerTest {
     //Then
     assertThat(responseEntity).isNotNull();
     assertThat(responseEntity.getStatusCode()).isEqualTo(OK);
-    assertThat(responseEntity.getBody().getData().get(PRODUCT_KEY)).isEqualTo(productDTO1);
+    ProductDTO actual = responseEntity.getBody().getData().get(PRODUCT_KEY);
+    assertThat(actual).isEqualTo(productDTO1);
   }
 
   @Test
@@ -202,6 +208,7 @@ class ProductControllerTest {
     //Then
     assertThat(responseEntity).isNotNull();
     assertThat(responseEntity.getStatusCode()).isEqualTo(OK);
-    assertThat(responseEntity.getBody().getData().get(PRODUCT_KEY)).isEqualTo(productDTO1);
+    ProductDTO actual = responseEntity.getBody().getData().get(PRODUCT_KEY);
+    assertThat(actual).isEqualTo(productDTO1);
   }
 }
