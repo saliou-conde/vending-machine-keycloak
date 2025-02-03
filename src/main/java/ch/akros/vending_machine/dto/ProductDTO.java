@@ -1,5 +1,6 @@
 package ch.akros.vending_machine.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,7 +9,9 @@ import lombok.Setter;
 @Setter
 @Builder
 public class ProductDTO {
+    @NotBlank(message = "the productId must not null or empty")
     private Integer productId;
+    @NotBlank(message = "the productId must not null or empty")
     private String productName;
     private Integer productPrice;
     private Integer quantity;

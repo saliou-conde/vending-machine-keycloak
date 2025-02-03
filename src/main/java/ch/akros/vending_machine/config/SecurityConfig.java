@@ -1,5 +1,7 @@
 package ch.akros.vending_machine.config;
 
+import ch.akros.vending_machine.exception.handler.CustomAccessDeniedHandler;
+import ch.akros.vending_machine.exception.handler.CustomAuthenticationEntryPoint;
 import ch.akros.vending_machine.service.JwtAuthConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +22,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 public class SecurityConfig {
 
   private final JwtAuthConverter jwtAuthConverter;
+  private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
   /**
    * Provides a SecurityFilterChain bean that configures HTTP security for the application.
@@ -30,7 +33,7 @@ public class SecurityConfig {
    */
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    return http
+    http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(req -> req
                     .requestMatchers(PUBLIC_URLS).permitAll()
@@ -42,6 +45,9 @@ public class SecurityConfig {
             )
             .sessionManagement(session -> session
                     .sessionCreationPolicy(STATELESS)
-            ).build();
+            )
+            .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint)
+                    .accessDeniedHandler(new CustomAccessDeniedHandler()));
+    return http.build();
   }
 }

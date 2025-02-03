@@ -5,6 +5,7 @@ import ch.akros.vending_machine.dto.PriceRequestDTO;
 import ch.akros.vending_machine.dto.ProductDTO;
 import ch.akros.vending_machine.dto.ProductResponseDto;
 import ch.akros.vending_machine.dto.mapper.ProductMapper;
+import ch.akros.vending_machine.exception.ProductNotFoundException;
 import ch.akros.vending_machine.repository.ProductRepository;
 import ch.akros.vending_machine.service.impl.ProductServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,7 +72,7 @@ class ProductServiceTest {
   }
 
   @Test
-  void getProduct() {
+  void getProduct() throws ProductNotFoundException {
     //Given
     ProductDTO productDTO = ProductDTO.builder()
             .productId(1)
@@ -96,7 +97,7 @@ class ProductServiceTest {
   }
 
   @Test
-  void getProductByNonExistingProduct() {
+  void getProductByNonExistingProduct() throws ProductNotFoundException {
     //Given
     ProductDTO productDTO = ProductDTO.builder()
             .productId(1)
@@ -350,7 +351,7 @@ class ProductServiceTest {
   }
 
   @Test
-  void buyProduct() {
+  void buyProduct() throws ProductNotFoundException {
     //Given
     ProductDTO productDTO = ProductDTO.builder()
             .productId(1)
@@ -376,7 +377,7 @@ class ProductServiceTest {
   }
 
   @Test
-  void buyProductByUsingNonExistingProductName() {
+  void buyProductByUsingNonExistingProductName() throws ProductNotFoundException {
     //Given
     ProductDTO productDTO = ProductDTO.builder()
             .productId(1)
@@ -402,7 +403,7 @@ class ProductServiceTest {
   }
 
   @Test
-  void buyProductWithNotAllowedCoins() {
+  void buyProductWithNotAllowedCoins() throws ProductNotFoundException {
     //Given
     ProductDTO productDTO = ProductDTO.builder()
             .productId(1)
@@ -428,7 +429,7 @@ class ProductServiceTest {
   }
 
   @Test
-  void buyProductWithLessThanPrice() {
+  void buyProductWithLessThanPrice() throws ProductNotFoundException {
     //Given
     ProductDTO productDTO = ProductDTO.builder()
             .productId(1)
@@ -454,7 +455,7 @@ class ProductServiceTest {
   }
 
   @Test
-  void buyProductWithMoreThanPrice() {
+  void buyProductWithMoreThanPrice() throws ProductNotFoundException {
     //Given
     ProductDTO productDTO = ProductDTO.builder()
             .productId(1)

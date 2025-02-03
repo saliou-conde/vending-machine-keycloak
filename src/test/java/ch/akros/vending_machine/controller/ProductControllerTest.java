@@ -3,6 +3,7 @@ package ch.akros.vending_machine.controller;
 import ch.akros.vending_machine.dto.PriceRequestDTO;
 import ch.akros.vending_machine.dto.ProductDTO;
 import ch.akros.vending_machine.dto.ProductResponseDto;
+import ch.akros.vending_machine.exception.ProductNotFoundException;
 import ch.akros.vending_machine.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -92,7 +93,7 @@ class ProductControllerTest {
   }
 
   @Test
-  void getProductById() {
+  void getProductById() throws ProductNotFoundException {
     //Given
     ProductDTO productDTO1 = ProductDTO.builder()
             .productId(1)
@@ -180,7 +181,7 @@ class ProductControllerTest {
   }
 
   @Test
-  void buyProduct() {
+  void buyProduct() throws ProductNotFoundException {
     //Given
     ProductDTO productDTO1 = ProductDTO.builder()
             .productId(1)
