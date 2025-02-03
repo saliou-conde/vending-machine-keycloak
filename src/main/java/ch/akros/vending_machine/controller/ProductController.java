@@ -3,6 +3,7 @@ package ch.akros.vending_machine.controller;
 import ch.akros.vending_machine.dto.PriceRequestDTO;
 import ch.akros.vending_machine.dto.ProductDTO;
 import ch.akros.vending_machine.dto.ProductResponseDto;
+import ch.akros.vending_machine.exception.ProductNotFoundException;
 import ch.akros.vending_machine.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -73,7 +74,7 @@ public class ProductController {
   )
   @GetMapping("/{id}")
   @PreAuthorize("hasRole('client_user')")
-  public ResponseEntity<ProductResponseDto> getProductById(@PathVariable("id") Integer id) {
+  public ResponseEntity<ProductResponseDto> getProductById(@PathVariable("id") Integer id) throws ProductNotFoundException {
     ProductResponseDto productResponseDto = productService.getProduct(id);
     return  new ResponseEntity<>(productResponseDto, productResponseDto.getStatus());
   }
@@ -94,7 +95,7 @@ public class ProductController {
   )
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('client_remove')")
-  public ResponseEntity<ProductResponseDto> deleteProductById(@PathVariable("id") Integer id) {
+  public ResponseEntity<ProductResponseDto> deleteProductById(@PathVariable("id") Integer id) throws ProductNotFoundException {
     return  ResponseEntity.ok(productService.deleteProduct(id));
   }
 
@@ -114,7 +115,7 @@ public class ProductController {
   )
   @PutMapping("/{id}")
   @PreAuthorize("hasRole('client_update')")
-  public ResponseEntity<ProductResponseDto> updateProduct(@RequestBody ProductDTO productDTO, @PathVariable("id")Integer id) {
+  public ResponseEntity<ProductResponseDto> updateProduct(@RequestBody ProductDTO productDTO, @PathVariable("id")Integer id) throws ProductNotFoundException {
     return  ResponseEntity.ok(productService.updateProduct(productDTO, id));
   }
 
@@ -137,7 +138,7 @@ public class ProductController {
           }
   )
   @PostMapping("/{id}")
-  public ResponseEntity<ProductResponseDto> buyProduct(@PathVariable("id") Integer id, @RequestBody PriceRequestDTO priceRequestDTO) {
+  public ResponseEntity<ProductResponseDto> buyProduct(@PathVariable("id") Integer id, @RequestBody PriceRequestDTO priceRequestDTO) throws ProductNotFoundException {
     ProductResponseDto responseDto = productService.buyProduct(id, priceRequestDTO);
     return new ResponseEntity<>(responseDto, responseDto.getStatus());
   }

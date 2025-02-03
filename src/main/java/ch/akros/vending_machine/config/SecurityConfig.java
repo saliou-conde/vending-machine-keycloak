@@ -1,5 +1,6 @@
 package ch.akros.vending_machine.config;
 
+import ch.akros.vending_machine.exception.handler.CustomAccessDeniedHandler;
 import ch.akros.vending_machine.service.JwtAuthConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -8,6 +9,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 
 import static ch.akros.vending_machine.constant.AppConstant.PUBLIC_URLS;
@@ -30,7 +32,7 @@ public class SecurityConfig {
    */
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    return http
+    http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(req -> req
                     .requestMatchers(PUBLIC_URLS).permitAll()
@@ -42,6 +44,9 @@ public class SecurityConfig {
             )
             .sessionManagement(session -> session
                     .sessionCreationPolicy(STATELESS)
-            ).build();
+            )
+            .exceptionHandling(exception -> exception.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
+                    .accessDeniedHandler(new CustomAccessDeniedHandler()));
+    return http.build();
   }
 }

@@ -5,6 +5,7 @@ import ch.akros.vending_machine.dto.PriceRequestDTO;
 import ch.akros.vending_machine.dto.ProductDTO;
 import ch.akros.vending_machine.dto.ProductResponseDto;
 import ch.akros.vending_machine.dto.mapper.ProductMapper;
+import ch.akros.vending_machine.exception.ProductNotFoundException;
 import ch.akros.vending_machine.plausibility.ProductValidation;
 import ch.akros.vending_machine.plausibility.ProductValidator;
 import ch.akros.vending_machine.repository.ProductRepository;
@@ -38,7 +39,7 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public ProductResponseDto getProduct(Integer id) {
+  public ProductResponseDto getProduct(Integer id) throws ProductNotFoundException {
     Product productById = findProductById(id);
     var validation = ProductValidator.findProductById(id).apply(PRODUCT_MAPPER.mapToProductDTO(productById));
     if (validation == ProductValidation.VALID) {
@@ -52,7 +53,8 @@ public class ProductServiceImpl implements ProductService {
               .data(Map.of(PRODUCT_KEY, PRODUCT_MAPPER.mapToProductDTO(productById)))
               .build();
     }
-    return productNotFoundById(id);
+
+    throw new ProductNotFoundException("Product not found by ID: "+ id);
   }
 
   @Override
@@ -105,7 +107,7 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public ProductResponseDto deleteProduct(Integer id) {
+  public ProductResponseDto deleteProduct(Integer id) throws ProductNotFoundException {
     Product product = findProductById(id);
     if (product != null) {
       if (product.getQuantity() > 1) {
@@ -134,11 +136,12 @@ public class ProductServiceImpl implements ProductService {
               .data(Map.of(PRODUCT_KEY, PRODUCT_MAPPER.mapToProductDTO(product)))
               .build();
     }
-    return productNotFoundById(id);
+
+    throw new ProductNotFoundException("Product not found by ID: "+ id);
   }
 
   @Override
-  public ProductResponseDto updateProduct(ProductDTO productDTO, Integer id) {
+  public ProductResponseDto updateProduct(ProductDTO productDTO, Integer id) throws ProductNotFoundException {
     if (productDTO.getQuantity() != null && productDTO.getQuantity() > 10) {
       return ProductResponseDto.builder()
               .timestamp(Instant.now().toString())
@@ -171,10 +174,11 @@ public class ProductServiceImpl implements ProductService {
               .data(Map.of(PRODUCT_KEY, PRODUCT_MAPPER.mapToProductDTO(update)))
               .build();
     }
-    return productNotFoundById(id);
+
+    throw new ProductNotFoundException("Product not found by ID: "+ id);
   }
 
-  public ProductResponseDto buyProduct(Integer id, PriceRequestDTO priceRequestDTO) {
+  public ProductResponseDto buyProduct(Integer id, PriceRequestDTO priceRequestDTO) throws ProductNotFoundException {
     List<Integer> prices = priceRequestDTO.getPrices();
     var notAllowed = prices.stream().filter(price -> price == 1 || price == 5 || price == 500).toList();
     if (!notAllowed.isEmpty()) {
@@ -190,7 +194,7 @@ public class ProductServiceImpl implements ProductService {
     return buyProduct(id, prices.stream().reduce(0, Integer::sum));
   }
 
-  private ProductResponseDto buyProduct(Integer id, Integer price) {
+  private ProductResponseDto buyProduct(Integer id, Integer price) throws ProductNotFoundException {
     ProductResponseDto productResponseDto = getProduct(id);
     if (productResponseDto != null && productResponseDto.getStatus() == OK) {
       ProductDTO productDTO = productResponseDto.getData().get(PRODUCT_KEY);
@@ -214,7 +218,8 @@ public class ProductServiceImpl implements ProductService {
       }
       return deleteProduct(id);
     }
-    return productNotFoundById(id);
+
+    throw new ProductNotFoundException("Product not found by ID: "+ id);
   }
 
   private Product findProductById(Integer id) {
