@@ -19,6 +19,7 @@ import java.util.Optional;
 import static ch.akros.vending_machine.constant.AppConstant.PRODUCT_KEY;
 import static ch.akros.vending_machine.dto.mapper.ProductMapper.PRODUCT_MAPPER;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.openMocks;
 import static org.springframework.http.HttpStatus.*;
@@ -99,6 +100,8 @@ class ProductServiceTest {
   @Test
   void getProductByNonExistingProduct() throws ProductNotFoundException {
     //Given
+    var id = Integer.MAX_VALUE;
+    String expectedResult = "Product not found by ID: "+id;
     ProductDTO productDTO = ProductDTO.builder()
             .productId(1)
             .productName("Cola")
@@ -111,11 +114,11 @@ class ProductServiceTest {
     when(productRepository.findById(productDTO.getProductId())).thenReturn(Optional.of(product));
 
     //When
-    ProductResponseDto responseDto = productService.getProduct(Integer.MAX_VALUE);
+    var responseDto = assertThrows(ProductNotFoundException.class, () -> productService.getProduct(id));
 
     //Then
     assertThat(responseDto).isNotNull();
-    assertThat(responseDto.getStatus()).isNotNull().isEqualTo(NOT_FOUND);
+    assertThat(responseDto.getMessage()).isNotNull().isEqualTo(expectedResult);
 
     //Verify
     verify(productRepository, times(0)).findById(productDTO.getProductId());
@@ -257,15 +260,17 @@ class ProductServiceTest {
             .productPrice(350)
             .quantity(1)
             .build();
+    var id = productDTO.getProductId();
+    String expectedResult = "Product not found by ID: "+id;
 
     when(productRepository.findById(productDTO.getProductId())).thenReturn(Optional.empty());
 
     //When
-    var responseDto = productService.deleteProduct(productDTO.getProductId());
+    var responseDto = assertThrows(ProductNotFoundException.class, () -> productService.deleteProduct(id));
 
     //Then
     assertThat(responseDto).isNotNull();
-    assertThat(responseDto.getStatus()).isNotNull().isEqualTo(NOT_FOUND);
+    assertThat(responseDto.getMessage()).isNotNull().isEqualTo(expectedResult);
 
     verify(productRepository, times(0)).deleteById(productDTO.getProductId());
   }
@@ -306,6 +311,8 @@ class ProductServiceTest {
             .productPrice(350)
             .quantity(1)
             .build();
+    var id = productDTO.getProductId();
+    String expectedResult = "Product not found by ID: "+id;
 
     Product product = MAPPER.mapToProduct(productDTO);
 
@@ -314,10 +321,10 @@ class ProductServiceTest {
 
 
     //When
-    var responseDto = productService.updateProduct(productDTO, productDTO.getProductId());
+    var responseDto = assertThrows(ProductNotFoundException.class, ()-> productService.updateProduct(productDTO, id));
 
     assertThat(responseDto).isNotNull();
-    assertThat(responseDto.getStatus()).isNotNull().isEqualTo(NOT_FOUND);
+    assertThat(responseDto.getMessage()).isNotNull().isEqualTo(expectedResult);
 
     //Verify
     verify(productRepository, times(0)).save(product);
@@ -379,6 +386,8 @@ class ProductServiceTest {
   @Test
   void buyProductByUsingNonExistingProductName() throws ProductNotFoundException {
     //Given
+    var id = Integer.MAX_VALUE;
+    String expectedResult = "Product not found by ID: "+id;
     ProductDTO productDTO = ProductDTO.builder()
             .productId(1)
             .productName("Cola")
@@ -395,11 +404,11 @@ class ProductServiceTest {
     when(productRepository.findById(productDTO.getProductId())).thenReturn(Optional.of(product));
 
     //When
-    var responseDto = productService.buyProduct(Integer.MAX_VALUE, priceRequestDTO);
+    var responseDto = assertThrows(ProductNotFoundException.class, ()->productService.buyProduct(id, priceRequestDTO));
 
     //Then
     assertThat(responseDto).isNotNull();
-    assertThat(responseDto.getStatus()).isNotNull().isEqualTo(NOT_FOUND);
+    assertThat(responseDto.getMessage()).isNotNull().isEqualTo(expectedResult);
   }
 
   @Test
@@ -478,5 +487,30 @@ class ProductServiceTest {
     //Then
     assertThat(responseDto).isNotNull();
     assertThat(responseDto.getStatus()).isNotNull().isEqualTo(BAD_REQUEST);
+  }
+
+  @Test
+  void buyProductWithoutProductResponseDto() {
+    //Given
+    ProductDTO productDTO = ProductDTO.builder()
+            .productId(1)
+            .productName("Cola")
+            .productPrice(350)
+            .quantity(1)
+            .build();
+    var id = productDTO.getProductId();
+    String expectedResult = "Product not found by ID: "+id;
+
+    PriceRequestDTO priceRequestDTO = PriceRequestDTO.builder()
+            .prices(List.of(50, 100, 100))
+            .build();
+
+    when(productRepository.findById(productDTO.getProductId())).thenReturn(Optional.empty());
+    //When
+    var responseDto = assertThrows(ProductNotFoundException.class, ()->productService.buyProduct(productDTO.getProductId(), priceRequestDTO));
+
+    //Then
+    assertThat(responseDto).isNotNull();
+    assertThat(responseDto.getMessage()).isNotNull().isEqualTo(expectedResult);
   }
 }

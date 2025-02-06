@@ -7,6 +7,7 @@ import ch.akros.vending_machine.exception.ProductNotFoundException;
 import ch.akros.vending_machine.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -53,7 +54,7 @@ public class ProductController {
   )
   @PostMapping
   @PreAuthorize("hasRole('client_admin')")
-  public ResponseEntity<ProductResponseDto> addProduct(@RequestBody ProductDTO productDTO) {
+  public ResponseEntity<ProductResponseDto> addProduct(@RequestBody @Valid ProductDTO productDTO) {
     var save = productService.createProduct(productDTO);
     return ResponseEntity.ok(save);
   }

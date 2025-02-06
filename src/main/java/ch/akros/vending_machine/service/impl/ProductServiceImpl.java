@@ -10,6 +10,7 @@ import ch.akros.vending_machine.plausibility.ProductValidation;
 import ch.akros.vending_machine.plausibility.ProductValidator;
 import ch.akros.vending_machine.repository.ProductRepository;
 import ch.akros.vending_machine.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,7 @@ import static org.springframework.http.HttpStatus.*;
 public class ProductServiceImpl implements ProductService {
 
   private static final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
+  private static final String PRODUCT_NOT_FOUND_BY_ID = "Product not found by ID: ";
   private final ProductRepository productRepository;
   private static final ProductMapper PRODUCT_MAPPER = ProductMapper.PRODUCT_MAPPER;
 
@@ -54,11 +56,11 @@ public class ProductServiceImpl implements ProductService {
               .build();
     }
 
-    throw new ProductNotFoundException("Product not found by ID: "+ id);
+    throw new ProductNotFoundException(PRODUCT_NOT_FOUND_BY_ID + id);
   }
 
   @Override
-  public ProductResponseDto createProduct(ProductDTO productDTO) {
+  public ProductResponseDto createProduct(@Valid ProductDTO productDTO) {
 
     var productName = productDTO.getProductName();
     var findProduct = productRepository.findByProductName(productName);
@@ -137,7 +139,7 @@ public class ProductServiceImpl implements ProductService {
               .build();
     }
 
-    throw new ProductNotFoundException("Product not found by ID: "+ id);
+    throw new ProductNotFoundException(PRODUCT_NOT_FOUND_BY_ID + id);
   }
 
   @Override
@@ -175,7 +177,7 @@ public class ProductServiceImpl implements ProductService {
               .build();
     }
 
-    throw new ProductNotFoundException("Product not found by ID: "+ id);
+    throw new ProductNotFoundException(PRODUCT_NOT_FOUND_BY_ID + id);
   }
 
   public ProductResponseDto buyProduct(Integer id, PriceRequestDTO priceRequestDTO) throws ProductNotFoundException {
@@ -196,45 +198,29 @@ public class ProductServiceImpl implements ProductService {
 
   private ProductResponseDto buyProduct(Integer id, Integer price) throws ProductNotFoundException {
     ProductResponseDto productResponseDto = getProduct(id);
-    if (productResponseDto != null && productResponseDto.getStatus() == OK) {
-      ProductDTO productDTO = productResponseDto.getData().get(PRODUCT_KEY);
-      log.info("Given Price is: {}, Product price is: {}", price, productDTO.getProductPrice());
-      if (price > productDTO.getProductPrice()) {
-        return ProductResponseDto.builder()
-                .message("Please insert a price = " + productDTO.getProductPrice() + ", inserted price is: " + price)
-                .error("Vending Machine can not return money change. Inserted price is higher than expected price")
-                .status(HttpStatus.BAD_REQUEST)
-                .timestamp(Instant.now().toString())
-                .path(PRODUCT_API_PATH + id)
-                .build();
-      } else if (price < productDTO.getProductPrice()) {
-        return ProductResponseDto.builder()
-                .message("Please insert a price = " + productDTO.getProductPrice() + ", inserted price is: " + price)
-                .error("Inserted price is lower than expected price")
-                .status(HttpStatus.BAD_REQUEST)
-                .timestamp(Instant.now().toString())
-                .path(PRODUCT_API_PATH + id)
-                .build();
-      }
-      return deleteProduct(id);
+    ProductDTO productDTO = productResponseDto.getData().get(PRODUCT_KEY);
+    log.info("Given Price is: {}, Product price is: {}", price, productDTO.getProductPrice());
+    if (price > productDTO.getProductPrice()) {
+      return ProductResponseDto.builder()
+              .message("Please insert a price = " + productDTO.getProductPrice() + ", inserted price is: " + price)
+              .error("Vending Machine can not return money change. Inserted price is higher than expected price")
+              .status(HttpStatus.BAD_REQUEST)
+              .timestamp(Instant.now().toString())
+              .path(PRODUCT_API_PATH + id)
+              .build();
+    } else if (price < productDTO.getProductPrice()) {
+      return ProductResponseDto.builder()
+              .message("Please insert a price = " + productDTO.getProductPrice() + ", inserted price is: " + price)
+              .error("Inserted price is lower than expected price")
+              .status(HttpStatus.BAD_REQUEST)
+              .timestamp(Instant.now().toString())
+              .path(PRODUCT_API_PATH + id)
+              .build();
     }
-
-    throw new ProductNotFoundException("Product not found by ID: "+ id);
+    return deleteProduct(id);
   }
 
   private Product findProductById(Integer id) {
     return productRepository.findById(id).orElse(null);
-  }
-
-  private ProductResponseDto productNotFoundById(Integer id) {
-    return ProductResponseDto.builder()
-            .timestamp(Instant.now().toString())
-            .status(NOT_FOUND)
-            .error("Product does not exist in the DB")
-            .message("Product not found by ID: " + id)
-            .statusCode(NOT_FOUND.value())
-            .path(PRODUCT_API_PATH + id)
-            .data(Map.of(PRODUCT_KEY, ProductDTO.builder().build()))
-            .build();
   }
 }

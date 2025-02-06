@@ -1,6 +1,7 @@
 package ch.akros.vending_machine.exception.handler;
 
 import ch.akros.vending_machine.exception.ProductNotFoundException;
+import org.hibernate.PropertyValueException;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -9,13 +10,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.nio.file.AccessDeniedException;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -36,21 +40,19 @@ public class ProductExceptionHandling implements ErrorController {
   }
 
   @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-  public ResponseEntity<ProblemDetail> handleMethodNotSupportedException(HttpRequestMethodNotSupportedException exception) {
-    Set<HttpMethod> supportedMethods = exception.getSupportedHttpMethods();
-    String allowedMethod = !supportedMethods.isEmpty() ? supportedMethods.iterator().next().name()
-            : "UNKNOWN";
-    return handleGenericException(METHOD_NOT_ALLOWED, String.format(METHOD_IS_NOT_ALLOWED, allowedMethod));
+  public ResponseEntity<ProblemDetail> methodNotSupportedException(HttpRequestMethodNotSupportedException exception) {
+    HttpMethod supportedMethod = Objects.requireNonNull(exception.getSupportedHttpMethods()).iterator().next();
+    return handleGenericException(METHOD_NOT_ALLOWED, String.format(METHOD_IS_NOT_ALLOWED, supportedMethod));
   }
 
   @ExceptionHandler(ProductNotFoundException.class)
   public ResponseEntity<ProblemDetail> handleProductNotFoundException(ProductNotFoundException exception) {
-    return handleGenericException(BAD_REQUEST, exception.getMessage(), PRODUCT_NOT_FOUND_BY_ID);
+    return generateProblemDetail(BAD_REQUEST, exception.getMessage(), PRODUCT_NOT_FOUND_BY_ID);
   }
 
   @ExceptionHandler(AuthenticationException.class)
   public ResponseEntity<ProblemDetail> handleUnauthorizedException(AuthenticationException exception) {
-    return handleGenericException(UNAUTHORIZED, UNAUTHORIZED_ACCESS, exception.getMessage());
+    return generateProblemDetail(UNAUTHORIZED, UNAUTHORIZED_ACCESS, exception.getMessage());
   }
 
   @ExceptionHandler(JwtException.class)
@@ -63,18 +65,37 @@ public class ProductExceptionHandling implements ErrorController {
     return handleGenericException(UNAUTHORIZED, message);
   }
 
-  private ResponseEntity<ProblemDetail> handleGenericException(HttpStatus status, String message, String title) {
-    ProblemDetail problemDetail = createProblemDetail(status, message, title);
+  @ExceptionHandler(PropertyValueException.class)
+  public ResponseEntity<ProblemDetail> handlePropertyValueException(PropertyValueException exception) {
+    return handleGenericException(BAD_REQUEST, exception.getMessage());
+  }
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ProblemDetail> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+    Map<String, Object> errors = new HashMap<>();
+    exception.getBindingResult().getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
+
+    return handleGenericException(exception.getMessage(), errors);
+  }
+
+  private ResponseEntity<ProblemDetail> generateProblemDetail(HttpStatus status, String message, String title) {
+    ProblemDetail problemDetail = handleGenericException(status, message, title, null);
     return new ResponseEntity<>(problemDetail, status);
   }
 
   private ResponseEntity<ProblemDetail> handleGenericException(HttpStatus status, String message) {
-    return handleGenericException(status, message, null);
+    return generateProblemDetail(status, message, null);
   }
 
-  private ProblemDetail createProblemDetail(HttpStatus status, String message, String title) {
+  private ResponseEntity<ProblemDetail> handleGenericException(String message, Map<String, Object> errors) {
+    ProblemDetail problemDetail = handleGenericException(HttpStatus.BAD_REQUEST, message, null, errors);
+    return new ResponseEntity<>(problemDetail, HttpStatus.BAD_REQUEST);
+  }
+
+  private ProblemDetail handleGenericException(HttpStatus status, String message, String title, Map<String, Object> properties) {
     ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, message);
     problemDetail.setTitle(Optional.ofNullable(title).orElse(status.getReasonPhrase()));
+    problemDetail.setProperties(Optional.ofNullable(properties).orElseGet(HashMap::new));
     problemDetail.setProperty("timestamp", Instant.now());
     return problemDetail;
   }
