@@ -2,6 +2,7 @@ package ch.akros.vending_machine.exception.handler;
 
 import ch.akros.vending_machine.exception.ProductNotFoundException;
 import org.hibernate.PropertyValueException;
+import org.postgresql.util.PSQLException;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -70,12 +71,17 @@ public class ProductExceptionHandling implements ErrorController {
     return handleGenericException(BAD_REQUEST, exception.getMessage());
   }
 
+  @ExceptionHandler(PSQLException.class)
+  public ResponseEntity<ProblemDetail> handlePSQLException(PSQLException exception) {
+    return handleGenericException(BAD_REQUEST, exception.getMessage());
+  }
+
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ProblemDetail> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
     Map<String, Object> errors = new HashMap<>();
     exception.getBindingResult().getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
 
-    return handleGenericException(exception.getMessage(), errors);
+    return handleGenericException(exception.getBody().getDetail(), errors);
   }
 
   private ResponseEntity<ProblemDetail> generateProblemDetail(HttpStatus status, String message, String title) {

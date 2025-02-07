@@ -17,11 +17,10 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer productId;
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     @NotBlank(message = "the productId must not null or empty")
     private String productName;
     @NotNull(message = "the productPrice must not null")
-    @Column(nullable = false)
     private Integer productPrice;
     private Integer quantity;
 }

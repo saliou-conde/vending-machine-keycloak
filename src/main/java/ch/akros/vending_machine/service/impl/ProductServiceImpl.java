@@ -25,6 +25,8 @@ import static ch.akros.vending_machine.constant.AppConstant.PRODUCT_API_PATH;
 import static ch.akros.vending_machine.constant.AppConstant.PRODUCT_KEY;
 import static org.springframework.http.HttpStatus.*;
 
+;
+
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
@@ -143,7 +145,7 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public ProductResponseDto updateProduct(ProductDTO productDTO, Integer id) throws ProductNotFoundException {
+  public ProductResponseDto updateProduct(@Valid ProductDTO productDTO, Integer id) throws ProductNotFoundException {
     if (productDTO.getQuantity() != null && productDTO.getQuantity() > 10) {
       return ProductResponseDto.builder()
               .timestamp(Instant.now().toString())

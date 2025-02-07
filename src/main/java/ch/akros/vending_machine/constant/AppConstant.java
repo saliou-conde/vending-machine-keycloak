@@ -6,11 +6,6 @@ package ch.akros.vending_machine.constant;
 public class AppConstant {
   public static final String[] PUBLIC_URLS = {
           "/actuator/**",
-          "/api/v1/auth/register",
-          "/api/v1/auth/authenticate",
-          "/api/v1/auth/active/**",
-          "/api/v1/auth/reset-password/**",
-          "/api/v1/auth/change-password/**",
           "/v2/api-docs",
           "/v3/api-docs",
           "/v3/api-docs/**",

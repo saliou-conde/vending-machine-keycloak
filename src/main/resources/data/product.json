@@ -1,0 +1,44 @@
+[
+  {
+    "productId": 1,
+    "productName": "Coka Cola",
+    "productPrice": 300,
+    "quantity": 6
+  },
+  {
+    "productId": 2,
+    "productName": "Fanta",
+    "productPrice": 350,
+    "quantity": 6
+  },
+  {
+    "productId": 3,
+    "productName": "Red Bull",
+    "productPrice": 400,
+    "quantity": 2
+  },
+  {
+    "productId": 4,
+    "productName": "Fanta Cola",
+    "productPrice": 400,
+    "quantity": 2
+  },
+  {
+    "productId": 5,
+    "productName": "Sprite",
+    "productPrice": 350,
+    "quantity": 1
+  },
+  {
+    "productId": 6,
+    "productName": "Sprite Cola",
+    "productPrice": 450,
+    "quantity": 4
+  },
+  {
+    "productId": 7,
+    "productName": "Sprite Fanta",
+    "productPrice": 400,
+    "quantity": 1
+  }
+]

@@ -54,7 +54,7 @@ public class ProductController {
   )
   @PostMapping
   @PreAuthorize("hasRole('client_admin')")
-  public ResponseEntity<ProductResponseDto> addProduct(@RequestBody @Valid ProductDTO productDTO) {
+  public ResponseEntity<ProductResponseDto> addProduct( @Valid @RequestBody ProductDTO productDTO) {
     var save = productService.createProduct(productDTO);
     return ResponseEntity.ok(save);
   }
@@ -115,8 +115,8 @@ public class ProductController {
           }
   )
   @PutMapping("/{id}")
-  @PreAuthorize("hasRole('client_update')")
-  public ResponseEntity<ProductResponseDto> updateProduct(@RequestBody ProductDTO productDTO, @PathVariable("id")Integer id) throws ProductNotFoundException {
+  @PreAuthorize("hasRole('client_admin')")
+  public ResponseEntity<ProductResponseDto> updateProduct(@Valid @RequestBody ProductDTO productDTO, @PathVariable("id")Integer id) throws ProductNotFoundException {
     return  ResponseEntity.ok(productService.updateProduct(productDTO, id));
   }
 
