@@ -122,7 +122,7 @@ class ProductControllerTest {
   }
 
   @Test
-  void deleteProductById() {
+  void deleteProductById() throws ProductNotFoundException {
     //Given
     ProductDTO productDTO1 = ProductDTO.builder()
             .productId(1)
@@ -151,7 +151,7 @@ class ProductControllerTest {
   }
 
   @Test
-  void updateProduct() {
+  void updateProduct() throws ProductNotFoundException {
     //Given
     ProductDTO productDTO1 = ProductDTO.builder()
             .productId(1)

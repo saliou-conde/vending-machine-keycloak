@@ -1,7 +1,6 @@
 package ch.akros.vending_machine.config;
 
 import ch.akros.vending_machine.exception.handler.CustomAccessDeniedHandler;
-import ch.akros.vending_machine.exception.handler.CustomAuthenticationEntryPoint;
 import ch.akros.vending_machine.service.JwtAuthConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -10,6 +9,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 
 import static ch.akros.vending_machine.constant.AppConstant.PUBLIC_URLS;
@@ -22,7 +22,6 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 public class SecurityConfig {
 
   private final JwtAuthConverter jwtAuthConverter;
-  private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
   /**
    * Provides a SecurityFilterChain bean that configures HTTP security for the application.
@@ -46,7 +45,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session
                     .sessionCreationPolicy(STATELESS)
             )
-            .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint)
+            .exceptionHandling(exception -> exception.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
                     .accessDeniedHandler(new CustomAccessDeniedHandler()));
     return http.build();
   }

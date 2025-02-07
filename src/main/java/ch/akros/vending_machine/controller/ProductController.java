@@ -7,6 +7,7 @@ import ch.akros.vending_machine.exception.ProductNotFoundException;
 import ch.akros.vending_machine.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -53,7 +54,7 @@ public class ProductController {
   )
   @PostMapping
   @PreAuthorize("hasRole('client_admin')")
-  public ResponseEntity<ProductResponseDto> addProduct(@RequestBody ProductDTO productDTO) {
+  public ResponseEntity<ProductResponseDto> addProduct( @Valid @RequestBody ProductDTO productDTO) {
     var save = productService.createProduct(productDTO);
     return ResponseEntity.ok(save);
   }
@@ -95,7 +96,7 @@ public class ProductController {
   )
   @DeleteMapping("/{id}")
   @PreAuthorize("hasRole('client_remove')")
-  public ResponseEntity<ProductResponseDto> deleteProductById(@PathVariable("id") Integer id) {
+  public ResponseEntity<ProductResponseDto> deleteProductById(@PathVariable("id") Integer id) throws ProductNotFoundException {
     return  ResponseEntity.ok(productService.deleteProduct(id));
   }
 
@@ -114,8 +115,8 @@ public class ProductController {
           }
   )
   @PutMapping("/{id}")
-  @PreAuthorize("hasRole('client_update')")
-  public ResponseEntity<ProductResponseDto> updateProduct(@RequestBody ProductDTO productDTO, @PathVariable("id")Integer id) {
+  @PreAuthorize("hasRole('client_admin')")
+  public ResponseEntity<ProductResponseDto> updateProduct(@Valid @RequestBody ProductDTO productDTO, @PathVariable("id")Integer id) throws ProductNotFoundException {
     return  ResponseEntity.ok(productService.updateProduct(productDTO, id));
   }
 

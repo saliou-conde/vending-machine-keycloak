@@ -39,3 +39,7 @@ Please do not use this configuration in Production.
 
 ### Build Project
 mvn clean install -DDB_PASSWORD=19A12iou# -DDB_URL=jdbc:postgresql://localhost:5432/akros -DDB_USERNAME=root
+mvn spring-boot:build-image
+
+### Application Properties ENV VAR DEV ####
+DB_PASSWORD=19A12iou#;DB_URL=jdbc:postgresql://localhost:5432/employee?useSSL=false;DB_USERNAME=root

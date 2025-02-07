@@ -11,7 +11,7 @@ public interface ProductService {
     List<ProductDTO> getProducts();
     ProductResponseDto getProduct(Integer id) throws ProductNotFoundException;
     ProductResponseDto createProduct(ProductDTO product);
-    ProductResponseDto deleteProduct(Integer id);
-    ProductResponseDto updateProduct(ProductDTO product, Integer id);
+    ProductResponseDto deleteProduct(Integer id) throws ProductNotFoundException ;
+    ProductResponseDto updateProduct(ProductDTO product, Integer id) throws ProductNotFoundException;
     ProductResponseDto buyProduct(Integer id, PriceRequestDTO priceRequestDTO) throws ProductNotFoundException;
 }
